@@ -6,14 +6,15 @@ import { TxButton } from './substrate-lib/components'
 
 import KittyCards from './KittyCards'
 
-const parseKitty = ({ dna, price, gender, owner }) => ({
-  dna,
-  price: price.toJSON(),
-  gender: gender.toJSON(),
-  owner: owner.toJSON(),
+const parseKitty = ({ dna, price, gender, owner, name }) => ({
+    dna,
+    price: price.toJSON(),
+    gender: gender.toJSON(),
+    owner: owner.toJSON(),
+    name: name.toHuman()
 })
 
-export default function Kitties(props) {
+export default function Kitties() {
   const { api, keyring } = useSubstrateState()
   const [kittyIds, setKittyIds] = useState([])
   const [kitties, setKitties] = useState([])
@@ -23,12 +24,10 @@ export default function Kitties(props) {
     let unsub = null
 
     const asyncFetch = async () => {
-      unsub = await api.query.substrateKitties.countForKitties(async count => {
-        // Fetch all kitty keys
-        const entries = await api.query.substrateKitties.kitties.entries()
-        const ids = entries.map(entry => entry[1].unwrap().dna)
-        setKittyIds(ids)
-      })
+        unsub = await api.query.substrateKitties.kitties.entries(async entries => {
+            const ids = entries.map(entry => entry[0].toHuman()[0])
+            setKittyIds(ids)
+        })
     }
 
     asyncFetch()
